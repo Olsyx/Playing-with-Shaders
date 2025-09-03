@@ -22,15 +22,15 @@ Light InitLight()
     Light light;
     light.Position = Vector3{ 0.0f, 10.0f, 10.0f };
     light.Direction = Vector3{ 0.0f, -1.0f, -1.0f };
-    light.Color = Vector3{ 1.0f, 1.0f, 1.0f };
+    light.Color = Vector3{ 1.0f, 0.75f, 0.0f };
     light.Strength = 0.1f;
     return light;
 }
 
 Shader InitShader(Light &light) 
 {
-    Shader shader = LoadShader(0, "res/shaders/unlit_tex.fs");
-    /*
+    Shader shader = LoadShader("res/shaders/lighting.vs", "res/shaders/lambert.fs");
+    
     int loc = GetShaderLocation(shader, "lightPos");
     SetShaderValue(shader, loc, &light.Position, SHADER_UNIFORM_VEC3);
 
@@ -42,7 +42,7 @@ Shader InitShader(Light &light)
 
     loc = GetShaderLocation(shader, "ambientStrength");
     SetShaderValue(shader, loc, &light.Strength, SHADER_ATTRIB_FLOAT);
-    */
+    
     return shader;
 }
 
@@ -67,7 +67,7 @@ int main(void)
 
     SceneObject targetSO;
     targetSO.Load(GenMeshSphere(3, 8, 8));
-    targetSO.SetTexture(MATERIAL_MAP_DIFFUSE, TextureIds::Checkerboard);
+    targetSO.SetTexture(MATERIAL_MAP_ALBEDO, TextureIds::Checkerboard);
     targetSO.SetTransform(Vector3{ 0.0f, 0.0f, 0.0f }, Vector3{ 90.0, 0.0, 0.0 });
     targetSO.SetShader(shader);
 
