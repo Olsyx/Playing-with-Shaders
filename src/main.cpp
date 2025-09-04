@@ -27,23 +27,23 @@ Light InitLight()
     return light;
 }
 
-Shader InitShader(Light &light) 
+void UpdateShader(Shader* shader, Camera& camera, Light& light)
 {
-    Shader shader = LoadShader("res/shaders/lighting.vs", "res/shaders/lambert.fs");
-    
-    int loc = GetShaderLocation(shader, "lightPos");
-    SetShaderValue(shader, loc, &light.Position, SHADER_UNIFORM_VEC3);
 
-    loc = GetShaderLocation(shader, "lightDir");
-    SetShaderValue(shader, loc, &light.Direction, SHADER_UNIFORM_VEC3);
+    int loc = GetShaderLocation(*shader, "viewPos");
+    SetShaderValue(*shader, loc, &camera.position, SHADER_UNIFORM_VEC3);
 
-    loc = GetShaderLocation(shader, "ambientColor");
-    SetShaderValue(shader, loc, &light.Color, SHADER_UNIFORM_VEC3);
+    loc = GetShaderLocation(*shader, "lightPos");
+    SetShaderValue(*shader, loc, &light.Position, SHADER_UNIFORM_VEC3);
 
-    loc = GetShaderLocation(shader, "ambientStrength");
-    SetShaderValue(shader, loc, &light.Strength, SHADER_ATTRIB_FLOAT);
-    
-    return shader;
+    loc = GetShaderLocation(*shader, "lightDir");
+    SetShaderValue(*shader, loc, &light.Direction, SHADER_UNIFORM_VEC3);
+
+    loc = GetShaderLocation(*shader, "ambientColor");
+    SetShaderValue(*shader, loc, &light.Color, SHADER_UNIFORM_VEC3);
+
+    loc = GetShaderLocation(*shader, "ambientStrength");
+    SetShaderValue(*shader, loc, &light.Strength, SHADER_ATTRIB_FLOAT);
 }
 
 int main(void)
@@ -57,7 +57,9 @@ int main(void)
     AllTextures::Init();
     Camera camera = InitCamera();
     Light light = InitLight();
-    Shader shader = InitShader(light);
+
+    Shader shader = LoadShader("res/shaders/lighting.vs", "res/shaders/lambert_specular.fs");
+    UpdateShader(&shader, camera, light);
 
     SceneObject lightSO;
     lightSO.Load(GenMeshCone(1, 2, 5));
@@ -74,6 +76,8 @@ int main(void)
     while (!WindowShouldClose())    
     {
         UpdateCamera(&camera, CAMERA_ORBITAL);
+        UpdateShader(&shader, camera, light);
+
         BeginDrawing();
 
             ClearBackground(DARKGRAY);
