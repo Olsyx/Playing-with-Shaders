@@ -44,6 +44,20 @@ void UpdateShader(Shader* shader, Camera& camera, Light& light)
 
     loc = GetShaderLocation(*shader, "ambientStrength");
     SetShaderValue(*shader, loc, &light.Strength, SHADER_ATTRIB_FLOAT);
+
+    float smoothness = 0.2;
+    loc = GetShaderLocation(*shader, "smoothness");
+    SetShaderValue(*shader, loc, &smoothness, SHADER_ATTRIB_FLOAT);
+
+    float metallic = 0.2;
+    loc = GetShaderLocation(*shader, "metallic");
+    SetShaderValue(*shader, loc, &metallic, SHADER_ATTRIB_FLOAT);
+
+    /*Vector3 specularTint = Vector3{1.0, 1.0, 1.0};
+    loc = GetShaderLocation(*shader, "specularTint");
+    SetShaderValue(*shader, loc, &specularTint, SHADER_UNIFORM_VEC3);*/
+
+
 }
 
 int main(void)
@@ -58,7 +72,7 @@ int main(void)
     Camera camera = InitCamera();
     Light light = InitLight();
 
-    Shader shader = LoadShader("res/shaders/lighting.vs", "res/shaders/lambert_specular.fs");
+    Shader shader = LoadShader("res/shaders/lighting.vs", "res/shaders/4-blinn-phong.fs");
     UpdateShader(&shader, camera, light);
 
     SceneObject lightSO;
@@ -68,7 +82,7 @@ int main(void)
     lightSO.LookAt(light.Direction);
 
     SceneObject targetSO;
-    targetSO.Load(GenMeshSphere(3, 8, 8));
+    targetSO.Load(GenMeshSphere(3, 16, 16));
     targetSO.SetTexture(MATERIAL_MAP_ALBEDO, TextureIds::Checkerboard);
     targetSO.SetTransform(Vector3{ 0.0f, 0.0f, 0.0f }, Vector3{ 90.0, 0.0, 0.0 });
     targetSO.SetShader(shader);

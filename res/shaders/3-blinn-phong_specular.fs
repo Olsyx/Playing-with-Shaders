@@ -11,6 +11,9 @@ uniform sampler2D texture0;
 
 uniform vec4 colDiffuse;     // The tint passed when drawing
 
+uniform float smoothness;
+uniform vec3 specularTint;
+
 uniform vec3 viewPos;
 uniform vec3 lightPos;
 uniform vec3 lightDir;
@@ -24,8 +27,10 @@ void main()
 
     vec3 viewDir = normalize(viewPos - fragPosition);
     
-    vec3 reflectionDir = reflect(L, N);
-    float onlySpecular = max(0, dot(viewDir, reflectionDir));
+    vec3 halfVector = normalize(-L + viewDir);
+    float onlySpecular = max(0, dot(halfVector, N));
 
-    finalColor = vec4(vec3(onlySpecular), fragColor.a);
+    vec3 specular = specularTint * ambientColor * pow(onlySpecular, smoothness * 100);
+
+    finalColor = vec4(specular, fragColor.a);
 }
