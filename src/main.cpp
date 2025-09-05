@@ -1,8 +1,9 @@
 #include "raylib.h"
 #include "raymath.h"
 
-#include "all_textures.h"
 #include "light.h"
+#include "all_textures.h"
+#include "shader_wrap.h"
 #include "scene_object.h"
 
 Camera InitCamera() 
@@ -20,44 +21,11 @@ Camera InitCamera()
 Light InitLight() 
 {
     Light light;
-    light.Position = Vector3{ 0.0f, 10.0f, 10.0f };
-    light.Direction = Vector3{ 0.0f, -1.0f, -1.0f };
-    light.Color = Vector3{ 1.0f, 0.75f, 0.0f };
-    light.Strength = 0.1f;
+    light.position = Vector3{ 0.0f, 10.0f, 10.0f };
+    light.direction = Vector3{ 0.0f, -1.0f, -1.0f };
+    light.color = Vector3{ 1.0f, 0.75f, 0.0f };
+    light.intensity = 1.0f;
     return light;
-}
-
-void UpdateShader(Shader* shader, Camera& camera, Light& light)
-{
-
-    int loc = GetShaderLocation(*shader, "viewPos");
-    SetShaderValue(*shader, loc, &camera.position, SHADER_UNIFORM_VEC3);
-
-    loc = GetShaderLocation(*shader, "lightPos");
-    SetShaderValue(*shader, loc, &light.Position, SHADER_UNIFORM_VEC3);
-
-    loc = GetShaderLocation(*shader, "lightDir");
-    SetShaderValue(*shader, loc, &light.Direction, SHADER_UNIFORM_VEC3);
-
-    loc = GetShaderLocation(*shader, "ambientColor");
-    SetShaderValue(*shader, loc, &light.Color, SHADER_UNIFORM_VEC3);
-
-    loc = GetShaderLocation(*shader, "ambientStrength");
-    SetShaderValue(*shader, loc, &light.Strength, SHADER_ATTRIB_FLOAT);
-
-    float smoothness = 0.2;
-    loc = GetShaderLocation(*shader, "smoothness");
-    SetShaderValue(*shader, loc, &smoothness, SHADER_ATTRIB_FLOAT);
-
-    float metallic = 0.2;
-    loc = GetShaderLocation(*shader, "metallic");
-    SetShaderValue(*shader, loc, &metallic, SHADER_ATTRIB_FLOAT);
-
-    /*Vector3 specularTint = Vector3{1.0, 1.0, 1.0};
-    loc = GetShaderLocation(*shader, "specularTint");
-    SetShaderValue(*shader, loc, &specularTint, SHADER_UNIFORM_VEC3);*/
-
-
 }
 
 int main(void)
@@ -70,34 +38,43 @@ int main(void)
 
     AllTextures::Init();
     Camera camera = InitCamera();
-    Light light = InitLight();
+    Light dirLight = InitLight();
 
-    Shader shader = LoadShader("res/shaders/lighting.vs", "res/shaders/4-blinn-phong.fs");
-    UpdateShader(&shader, camera, light);
+    ShaderWrap shader("res/shaders/lighting.vs", "res/shaders/4-blinn-phong.fs");
+    shader.UpdateDirectionalLight(dirLight);
 
-    SceneObject lightSO;
-    lightSO.Load(GenMeshCone(1, 2, 5));
-    lightSO.SetTransform(light.Position, Vector3{ 0.0, 0.0, 0.0 });
-    lightSO.SetForward(Vector3{ 0.0, -1.0, 0.0 });
-    lightSO.LookAt(light.Direction);
+    SceneObject dirLightSO;
+    dirLightSO.Load(GenMeshCone(1, 2, 5));
+    dirLightSO.SetTransform(dirLight.position, Vector3{ 0.0, 0.0, 0.0 });
+    dirLightSO.SetForward(Vector3{ 0.0, -1.0, 0.0 });
+    dirLightSO.LookAt(dirLight.direction);
 
     SceneObject targetSO;
     targetSO.Load(GenMeshSphere(3, 16, 16));
     targetSO.SetTexture(MATERIAL_MAP_ALBEDO, TextureIds::Checkerboard);
     targetSO.SetTransform(Vector3{ 0.0f, 0.0f, 0.0f }, Vector3{ 90.0, 0.0, 0.0 });
-    targetSO.SetShader(shader);
+    targetSO.SetShader(*shader.Unwrap());
+
+    float smoothness = 0.8;
+    shader.SetFloat("smoothness", smoothness);
+
+    Vector3 specularTint = Vector3{ 1.0f, 1.0f, 1.0f };
+    shader.SetVector3("specularTint", specularTint);
+    
+    //float metallic = 0.8;
+    //shader.SetFloat("metallic", metallic);
 
     while (!WindowShouldClose())    
     {
         UpdateCamera(&camera, CAMERA_ORBITAL);
-        UpdateShader(&shader, camera, light);
+        shader.SetVector3("viewPos", camera.position);
 
         BeginDrawing();
 
             ClearBackground(DARKGRAY);
 
             BeginMode3D(camera);
-                lightSO.Draw(RED);
+                dirLightSO.Draw(RED);
                 targetSO.Draw(WHITE);
                 DrawGrid(20, 10.0f);
             EndMode3D();
@@ -106,9 +83,9 @@ int main(void)
         EndDrawing();
     }
 
-    lightSO.CleanUp();
+    dirLightSO.CleanUp();
     targetSO.CleanUp();
-    UnloadShader(shader);
+    shader.CleanUp();
 
     AllTextures::CleanUp();
     CloseWindow();       

@@ -16,7 +16,7 @@ void SceneObject::SetTexture(MaterialMapIndex index, TextureIds textureId)
     _model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = *AllTextures::Get(textureId);
 }
 
-void SceneObject::SetShader(Shader shader)
+void SceneObject::SetShader(Shader& shader)
 {
     _model.materials[0].shader = shader;
 }

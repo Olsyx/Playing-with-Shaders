@@ -18,7 +18,7 @@ public:
 	void Load(Mesh mesh);
 	void SetTexture(MaterialMapIndex index, TextureIds textureId);
 
-	void SetShader(Shader shader);
+	void SetShader(Shader& shader);
 	void SetTransform(Vector3 position, Vector3 rotation, float scale = 1);
 	void SetForward(Vector3 newForward);
 

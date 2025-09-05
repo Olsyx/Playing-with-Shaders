@@ -132,11 +132,13 @@
     <ClCompile Include="src\all_textures.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\scene_object.cpp" />
+    <ClCompile Include="src\shader_wrap.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\all_textures.h" />
     <ClInclude Include="src\light.h" />
     <ClInclude Include="src\scene_object.h" />
+    <ClInclude Include="src\shader_wrap.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

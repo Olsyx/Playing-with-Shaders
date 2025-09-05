@@ -1,10 +1,15 @@
 #pragma once
 #include "raylib.h"
 
+typedef enum LightTypes {
+	Directional, Point, Spotlight
+};
+
 typedef struct Light
 {
-	Vector3 Position;
-	Vector3 Direction;
-	Vector3 Color;
-	float Strength;
+	Vector3 position;
+	LightTypes type;
+	Vector3 direction;
+	Vector3 color;
+	float intensity;
 };
