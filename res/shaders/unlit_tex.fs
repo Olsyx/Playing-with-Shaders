@@ -14,5 +14,5 @@ uniform vec4 colDiffuse;    // The tint passed when drawing
 void main() 
 {
     vec4 texel = texture(texture0, fragTexCoord);
-    finalColor = texel * colDiffuse;
+    finalColor = texel + colDiffuse;
 }
