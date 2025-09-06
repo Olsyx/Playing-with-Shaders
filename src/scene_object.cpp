@@ -3,13 +3,28 @@
 #pragma region Init & CleanUp
 void SceneObject::Load(const char* pathToModel)
 {
+    ++_gen;
     _model = LoadModel(pathToModel);
 }
 
 void SceneObject::Load(Mesh mesh)
 {
+    ++_gen;
     _model = LoadModelFromMesh(mesh);
 }
+
+int SceneObject::GetGen() 
+{
+    return _gen;
+}
+
+void SceneObject::CleanUp()
+{
+    // AllTextures unloads Textures
+    UnloadModel(_model);
+}
+#pragma endregion
+
 
 void SceneObject::SetTexture(MaterialMapIndex index, TextureIds textureId)
 {
@@ -20,13 +35,6 @@ void SceneObject::SetShader(Shader& shader)
 {
     _model.materials[0].shader = shader;
 }
-
-void SceneObject::CleanUp()
-{
-    // AllTextures unloads Textures
-    UnloadModel(_model);
-}
-#pragma endregion
 
 #pragma region Transform Calculations
 void SceneObject::SetTransform(Vector3 position, Vector3 degrees, float scale)

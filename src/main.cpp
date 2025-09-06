@@ -3,6 +3,7 @@
 
 #include "light.h"
 #include "all_textures.h"
+#include "all_scene_objects.h"
 #include "shader_wrap.h"
 #include "scene_object.h"
 
@@ -37,23 +38,25 @@ int main(void)
     SetTargetFPS(60);               
 
     AllTextures::Init();
+    AllSceneObjects::Init();
     Camera camera = InitCamera();
     Light dirLight = InitLight();
 
-    ShaderWrap shader("res/shaders/lighting.vs", "res/shaders/4-blinn-phong.fs");
+    ShaderWrap shader("res/shaders/lighting.vs", "res/shaders/unlit_tex.fs");
     shader.UpdateDirectionalLight(dirLight);
 
-    SceneObject dirLightSO;
-    dirLightSO.Load(GenMeshCone(1, 2, 5));
-    dirLightSO.SetTransform(dirLight.position, Vector3{ 0.0, 0.0, 0.0 });
-    dirLightSO.SetForward(Vector3{ 0.0, -1.0, 0.0 });
-    dirLightSO.LookAt(dirLight.direction);
+    Handle dirLightHandle = AllSceneObjects::Load(GenMeshCone(1, 2, 5));
+    Handle sphereHandle = AllSceneObjects::Load(GenMeshSphere(3, 16, 16));
 
-    SceneObject targetSO;
-    targetSO.Load(GenMeshSphere(3, 16, 16));
-    targetSO.SetTexture(MATERIAL_MAP_ALBEDO, TextureIds::Checkerboard);
-    targetSO.SetTransform(Vector3{ 0.0f, 0.0f, 0.0f }, Vector3{ 90.0, 0.0, 0.0 });
-    targetSO.SetShader(*shader.Unwrap());
+    SceneObject* dirLightSO = AllSceneObjects::Get(dirLightHandle);
+    dirLightSO->SetTransform(dirLight.position, Vector3{ 0.0, 0.0, 0.0 });
+    dirLightSO->SetForward(Vector3{ 0.0, -1.0, 0.0 });
+    dirLightSO->LookAt(dirLight.direction);
+
+    SceneObject* sphereSO = AllSceneObjects::Get(sphereHandle);
+    sphereSO->SetTexture(MATERIAL_MAP_ALBEDO, TextureIds::Checkerboard);
+    sphereSO->SetTransform(Vector3{ 0.0f, 0.0f, 0.0f }, Vector3{ 90.0, 0.0, 0.0 });
+    sphereSO->SetShader(*shader.Unwrap());
 
     float smoothness = 0.8;
     shader.SetFloat("smoothness", smoothness);
@@ -74,8 +77,7 @@ int main(void)
             ClearBackground(DARKGRAY);
 
             BeginMode3D(camera);
-                dirLightSO.Draw(RED);
-                targetSO.Draw(WHITE);
+                AllSceneObjects::Draw();
                 DrawGrid(20, 10.0f);
             EndMode3D();
 
@@ -83,10 +85,9 @@ int main(void)
         EndDrawing();
     }
 
-    dirLightSO.CleanUp();
-    targetSO.CleanUp();
     shader.CleanUp();
 
+    AllSceneObjects::CleanUp();
     AllTextures::CleanUp();
     CloseWindow();       
 

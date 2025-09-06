@@ -5,6 +5,7 @@
 
 typedef class SceneObject
 {
+	int _gen = -1;
 	Vector3 _localForward;	
 	Vector3 _worldForward;
 	Transform _transform;	// Keeps object's world pos, quaternion and scale
@@ -16,9 +17,11 @@ typedef class SceneObject
 public:
 	void Load(const char* pathToModel);
 	void Load(Mesh mesh);
-	void SetTexture(MaterialMapIndex index, TextureIds textureId);
 
+	int GetGen();
+	void SetTexture(MaterialMapIndex index, TextureIds textureId);
 	void SetShader(Shader& shader);
+	
 	void SetTransform(Vector3 position, Vector3 rotation, float scale = 1);
 	void SetForward(Vector3 newForward);
 
